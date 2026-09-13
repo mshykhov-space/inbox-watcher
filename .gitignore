@@ -1,0 +1,17 @@
+# Gradle
+.gradle/
+build/
+
+# IDE
+.idea/
+*.iml
+
+# Local env / secrets
+.env
+*.local
+
+# SQLite state (local runs)
+data/
+*.db
+*.db-shm
+*.db-wal
