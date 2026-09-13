@@ -2,12 +2,14 @@ FROM eclipse-temurin:21-jdk AS build
 
 WORKDIR /workspace
 
+ARG APP_VERSION=0.14.0-SNAPSHOT
+
 COPY gradle gradle
 COPY gradlew gradlew
 COPY gradle.properties settings.gradle.kts build.gradle.kts ./
 COPY src src
 
-RUN ./gradlew --no-daemon clean installDist
+RUN ./gradlew --no-daemon -PreleaseVersion="$APP_VERSION" clean installDist
 
 FROM eclipse-temurin:21-jre
 
