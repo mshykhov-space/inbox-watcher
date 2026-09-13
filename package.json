@@ -1,0 +1,15 @@
+{
+  "name": "inbox-watcher-agent-config",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "rulesync:install": "rulesync install --config rulesync.jsonc --frozen",
+    "rulesync:generate": "rulesync generate --config rulesync.jsonc --input-root . --output-roots .",
+    "rulesync:check": "rulesync generate --config rulesync.jsonc --input-root . --output-roots . --check"
+  },
+  "devDependencies": {
+    "rulesync": "16.9.1"
+  }
+}

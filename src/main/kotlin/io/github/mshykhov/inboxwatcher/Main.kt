@@ -6,7 +6,7 @@ import java.util.concurrent.CountDownLatch
 fun main() {
     val config = RuntimeConfig.fromEnvironment()
     val app =
-        EmailWatcher(config).also { watcher ->
+        InboxWatcher(config).also { watcher ->
             Runtime.getRuntime().addShutdownHook(Thread(watcher::close))
         }
     app.start()

@@ -28,7 +28,7 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 /** Composition root: wires the polling pipeline + health server and owns their lifecycle. */
-class EmailWatcher(
+class InboxWatcher(
     private val config: RuntimeConfig,
     private val http: HttpHandler = defaultHttpHandler(),
 ) : AutoCloseable {
@@ -75,7 +75,7 @@ class EmailWatcher(
     private val health = PipelineHealth(staleAfterMillis = config.pollIntervalSeconds * 5 * 1000)
     private val server = healthApp(health, registry, accountEmail).asServer(Undertow(config.httpPort))
 
-    fun start(): EmailWatcher {
+    fun start(): InboxWatcher {
         server.start()
         scheduler.scheduleWithFixedDelay(::pollSafely, 0, config.pollIntervalSeconds, TimeUnit.SECONDS)
         scheduler.scheduleWithFixedDelay({ sqlite.pruneOlderThanDays(RETENTION_DAYS) }, 0, 24, TimeUnit.HOURS)
@@ -110,7 +110,7 @@ class EmailWatcher(
     }
 
     private companion object {
-        val logger = LoggerFactory.getLogger(EmailWatcher::class.java)
+        val logger = LoggerFactory.getLogger(InboxWatcher::class.java)
 
         // Dedup needs the Gmail list window (1d); 7d keeps a week of decisions for debugging.
         const val RETENTION_DAYS = 7L
