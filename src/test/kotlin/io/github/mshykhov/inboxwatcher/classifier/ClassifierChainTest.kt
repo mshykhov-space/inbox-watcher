@@ -14,22 +14,19 @@ class ClassifierChainTest {
         cerebrasEnabled: Boolean = false,
         cerebras: String? = null,
         groq: String? = null,
-    ) = RuntimeConfig(
-        googleClientId = "c",
-        googleClientSecret = "s",
-        googleRefreshToken = "r",
-        geminiApiKey = "g",
-        geminiEnabled = geminiEnabled,
-        cerebrasEnabled = cerebrasEnabled,
-        cerebrasApiKey = cerebras,
-        groqApiKey = groq,
-        telegramBotToken = "b",
-        telegramChatId = "1",
-        stateDbPath = "/tmp/x.db",
-        httpPort = 8080,
-        pollIntervalSeconds = 60,
-        silenceAlertHours = 12,
-        publicBaseUrl = null,
+    ) = RuntimeConfig.fromMap(
+        mapOf(
+            "GOOGLE_CLIENT_ID" to "c",
+            "GOOGLE_CLIENT_SECRET" to "s",
+            "GOOGLE_REFRESH_TOKEN" to "r",
+            "TELEGRAM_BOT_TOKEN" to "b",
+            "TELEGRAM_CHAT_ID" to "1",
+            "GEMINI_API_KEY" to "g",
+            "GEMINI_ENABLED" to geminiEnabled.toString(),
+            "CEREBRAS_ENABLED" to cerebrasEnabled.toString(),
+            "CEREBRAS_API_KEY" to cerebras.orEmpty(),
+            "GROQ_API_KEY" to groq.orEmpty(),
+        ),
     )
 
     @Test

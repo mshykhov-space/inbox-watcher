@@ -1,5 +1,6 @@
 package io.github.mshykhov.inboxwatcher.classifier
 
+import io.github.mshykhov.inboxwatcher.config.AiResponseFormat
 import io.github.mshykhov.inboxwatcher.core.Category
 import io.github.mshykhov.inboxwatcher.core.ClassifierException
 import io.github.mshykhov.inboxwatcher.core.EmailMessage
@@ -137,6 +138,8 @@ class OpenAiCompatibleClassifierTest {
         }
         OpenAiCompatibleClassifier(
             apiKey = "secret-key",
+            responseFormat = AiResponseFormat.JSON_SCHEMA,
+            reasoningEffort = "low",
             baseUri = "https://api.groq.com/openai/v1/chat/completions",
             model = "openai/gpt-oss-20b",
             http = handler,
@@ -156,6 +159,48 @@ class OpenAiCompatibleClassifierTest {
             body.contains("\"reasoning_effort\":\"low\""),
             "gpt-oss must run at low reasoning effort - bounded classification, avoids burning the completion budget",
         )
+    }
+
+    @Test
+    fun `omits optional parameters and authorization for local prompt only models`() {
+        val classifier =
+            OpenAiCompatibleClassifier(
+                apiKey = null,
+                baseUri = "http://localhost:1234/v1/chat/completions",
+                model = "local",
+                responseFormat = AiResponseFormat.NONE,
+                http = { request ->
+                    assertEquals(null, request.header("Authorization"))
+                    assertTrue(!request.bodyString().contains("response_format"))
+                    assertTrue(!request.bodyString().contains("reasoning_effort"))
+                    Response(Status.OK).body(
+                        completion(
+                            "```json\n" +
+                                """{"importance":"important","urgency":"urgent","category":"other","summary":"x"}""" + "\n```",
+                        ),
+                    )
+                },
+            )
+        assertEquals("x", classifier.classify(email).summary)
+    }
+
+    @Test
+    fun `uses portable JSON mode by default without reasoning parameters`() {
+        OpenAiCompatibleClassifier(
+            apiKey = "key",
+            baseUri = "https://example.test/v1/chat/completions",
+            model = "generic",
+            http = { request ->
+                assertTrue(request.bodyString().contains("json_object"))
+                assertTrue(!request.bodyString().contains("json_schema"))
+                assertTrue(!request.bodyString().contains("reasoning_effort"))
+                Response(Status.OK).body(
+                    completion(
+                        """{"importance":"important","urgency":"urgent","category":"other","summary":"x"}""",
+                    ),
+                )
+            },
+        ).classify(email)
     }
 
     @Test

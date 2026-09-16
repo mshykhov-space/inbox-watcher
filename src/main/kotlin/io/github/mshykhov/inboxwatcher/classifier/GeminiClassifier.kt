@@ -19,11 +19,13 @@ import org.http4k.core.Request
 
 /** Classifier backed by Google Gemini (AI Studio free tier) with native constrained JSON output. */
 class GeminiClassifier(
-    private val apiKey: String,
+    private val apiKey: String?,
     private val http: HttpHandler,
     private val model: String = "gemini-2.5-flash",
     private val maxBodyChars: Int = 4000,
     private val metrics: ClassifierMetrics? = null,
+    private val baseUrl: String = "https://generativelanguage.googleapis.com/v1beta",
+    private val provider: String = "gemini",
 ) : Classifier {
     override fun classify(email: EmailMessage): Classification {
         val startedNanos = System.nanoTime()
@@ -31,18 +33,18 @@ class GeminiClassifier(
             try {
                 http(buildRequest(email))
             } catch (failure: Exception) {
-                metrics?.record("gemini", model, "transport_error", "transport", startedNanos)
-                throw ClassifierException("gemini transport failure", failure)
+                metrics?.record(provider, model, "transport_error", "transport", startedNanos)
+                throw ClassifierException("$provider transport failure", failure)
             }
         if (!response.status.successful) {
-            metrics?.record("gemini", model, "http_error", response.status.code.toString(), startedNanos)
-            throw ClassifierException("gemini returned ${response.status}")
+            metrics?.record(provider, model, "http_error", response.status.code.toString(), startedNanos)
+            throw ClassifierException("$provider returned ${response.status}")
         }
         return try {
             val parsed = parseResponse(response.bodyString())
             val classification = parseClassification(extractText(parsed))
             metrics?.record(
-                provider = "gemini",
+                provider = provider,
                 model = model,
                 outcome = "success",
                 status = response.status.code.toString(),
@@ -52,7 +54,7 @@ class GeminiClassifier(
             )
             classification
         } catch (failure: ClassifierException) {
-            metrics?.record("gemini", model, "invalid_response", response.status.code.toString(), startedNanos)
+            metrics?.record(provider, model, "invalid_response", response.status.code.toString(), startedNanos)
             throw failure
         }
     }
@@ -86,8 +88,8 @@ class GeminiClassifier(
                     put("responseSchema", geminiSchema)
                 }
             }
-        return Request(Method.POST, "$BASE_URL/models/$model:generateContent")
-            .header("x-goog-api-key", apiKey)
+        return Request(Method.POST, "$baseUrl/models/$model:generateContent")
+            .let { request -> apiKey?.let { request.header("x-goog-api-key", it) } ?: request }
             .header("content-type", "application/json")
             .body(body.toString())
     }
@@ -106,11 +108,7 @@ class GeminiClassifier(
             ?.parts
             ?.firstOrNull()
             ?.text
-            ?: throw ClassifierException("gemini returned no content")
-
-    private companion object {
-        const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
-    }
+            ?: throw ClassifierException("$provider returned no content")
 }
 
 @Serializable

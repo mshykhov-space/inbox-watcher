@@ -35,11 +35,8 @@ class RuntimeConfigTest {
             )
 
         assertEquals("cid", config.googleClientId)
-        assertEquals("gkey", config.geminiApiKey)
-        assertEquals(false, config.geminiEnabled)
-        assertEquals(true, config.cerebrasEnabled)
-        assertEquals("ckey", config.cerebrasApiKey)
-        assertEquals("qkey", config.groqApiKey)
+        assertEquals(listOf("cerebras", "groq"), config.aiProviders.map { it.name })
+        assertEquals(listOf("ckey", "qkey"), config.aiProviders.map { it.apiKey })
         assertEquals("9001", config.telegramChatId)
         assertEquals("/data/x.db", config.stateDbPath)
         assertEquals(9090, config.httpPort)
@@ -52,10 +49,8 @@ class RuntimeConfigTest {
     fun `applies defaults for optionals`() {
         val config = RuntimeConfig.fromMap(required)
 
-        assertNull(config.cerebrasApiKey)
-        assertNull(config.groqApiKey)
-        assertEquals(true, config.geminiEnabled)
-        assertEquals(false, config.cerebrasEnabled)
+        assertEquals(listOf("gemini"), config.aiProviders.map { it.name })
+        assertEquals("gkey", config.aiProviders.single().apiKey)
         assertEquals("/state/inbox-watcher.db", config.stateDbPath)
         assertEquals(8080, config.httpPort)
         assertEquals(60L, config.pollIntervalSeconds)
@@ -70,8 +65,106 @@ class RuntimeConfigTest {
                 RuntimeConfig.fromMap(required - "GEMINI_API_KEY" - "TELEGRAM_CHAT_ID")
             }
 
-        assertEquals(true, error.message?.contains("GEMINI_API_KEY"))
         assertEquals(true, error.message?.contains("TELEGRAM_CHAT_ID"))
+    }
+
+    @Test
+    fun `selects groq without requiring a gemini key`() {
+        val config = RuntimeConfig.fromMap((required - "GEMINI_API_KEY") + ("GROQ_API_KEY" to "qkey"))
+        assertEquals(listOf("groq"), config.aiProviders.map { it.name })
+    }
+
+    @Test
+    fun `explicit provider list overrides legacy flags and ignores unused settings`() {
+        val config =
+            RuntimeConfig.fromMap(
+                required +
+                    mapOf(
+                        "AI_PROVIDERS" to " GROQ, Gemini ",
+                        "GROQ_API_KEY" to "qkey",
+                        "GEMINI_ENABLED" to "false",
+                        "CEREBRAS_ENABLED" to "invalid",
+                        "GROQ_MODEL" to "custom-model",
+                        "GEMINI_MODEL" to "custom-gemini",
+                    ),
+            )
+        assertEquals(listOf("groq", "gemini"), config.aiProviders.map { it.name })
+        assertEquals(listOf("custom-model", "custom-gemini"), config.aiProviders.map { it.model })
+        assertNull(config.aiProviders.first().reasoningEffort)
+        assertEquals(AiResponseFormat.JSON_OBJECT, config.aiProviders.first().responseFormat)
+    }
+
+    @Test
+    fun `supports custom local providers without dummy API keys`() {
+        val config =
+            RuntimeConfig.fromMap(
+                (required - "GEMINI_API_KEY") +
+                    mapOf(
+                        "AI_PROVIDERS" to "local",
+                        "LOCAL_BASE_URL" to "http://localhost:1234/v1/",
+                        "LOCAL_MODEL" to "my-model",
+                        "LOCAL_AUTH_REQUIRED" to "false",
+                        "LOCAL_RESPONSE_FORMAT" to "none",
+                    ),
+            )
+        assertEquals("http://localhost:1234/v1", config.aiProviders.single().baseUrl)
+        assertNull(config.aiProviders.single().apiKey)
+        assertEquals(AiResponseFormat.NONE, config.aiProviders.single().responseFormat)
+    }
+
+    @Test
+    fun `requires at least one configured provider`() {
+        assertFailsWith<ConfigException> { RuntimeConfig.fromMap(required - "GEMINI_API_KEY") }
+        assertFailsWith<ConfigException> { RuntimeConfig.fromMap(required + ("GEMINI_ENABLED" to "false")) }
+    }
+
+    @Test
+    fun `validates selected provider configuration before starting`() {
+        val base =
+            required +
+                mapOf(
+                    "AI_PROVIDERS" to "custom",
+                    "CUSTOM_BASE_URL" to "https://example.test/v1",
+                    "CUSTOM_MODEL" to "model",
+                    "CUSTOM_API_KEY" to "secret",
+                )
+        val invalid =
+            listOf(
+                mapOf("AI_PROVIDERS" to "custom,custom"),
+                mapOf("AI_PROVIDERS" to "custom,"),
+                mapOf("AI_PROVIDERS" to "../custom"),
+                mapOf("CUSTOM_API_KEY" to ""),
+                mapOf("CUSTOM_MODEL" to ""),
+                mapOf("CUSTOM_BASE_URL" to ""),
+                mapOf("CUSTOM_BASE_URL" to "file:///tmp/api"),
+                mapOf("CUSTOM_BASE_URL" to "https://secret@example.test/v1"),
+                mapOf("CUSTOM_BASE_URL" to "https://example.test/v1?api_key=secret"),
+                mapOf("CUSTOM_BASE_URL" to "https://example.test/v1#fragment"),
+                mapOf("CUSTOM_API_TYPE" to "unknown"),
+                mapOf("CUSTOM_RESPONSE_FORMAT" to "bad"),
+                mapOf("CUSTOM_AUTH_REQUIRED" to "bad"),
+                mapOf("CUSTOM_MAX_TOKENS" to "0"),
+            )
+        invalid.forEach { override ->
+            assertFailsWith<ConfigException>(override.keys.toString()) {
+                RuntimeConfig.fromMap(base + override)
+            }
+        }
+    }
+
+    @Test
+    fun `legacy gpt oss tuning is preserved and can be disabled`() {
+        val base = required + mapOf("AI_PROVIDERS" to "groq", "GROQ_API_KEY" to "qkey")
+        val provider = RuntimeConfig.fromMap(base).aiProviders.single()
+        assertEquals("low", provider.reasoningEffort)
+        assertEquals(AiResponseFormat.JSON_SCHEMA, provider.responseFormat)
+        assertNull(
+            RuntimeConfig
+                .fromMap(base + ("GROQ_REASONING_EFFORT" to "none"))
+                .aiProviders
+                .single()
+                .reasoningEffort,
+        )
     }
 
     @Test

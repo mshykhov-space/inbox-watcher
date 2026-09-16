@@ -1,47 +1,38 @@
 package io.github.mshykhov.inboxwatcher.classifier
 
+import io.github.mshykhov.inboxwatcher.config.AiProtocol
 import io.github.mshykhov.inboxwatcher.config.RuntimeConfig
 import io.github.mshykhov.inboxwatcher.core.Classifier
 import io.github.mshykhov.inboxwatcher.metrics.ClassifierMetrics
 import org.http4k.core.HttpHandler
 
-private const val CEREBRAS_URL = "https://api.cerebras.ai/v1/chat/completions"
-private const val CEREBRAS_MODEL = "gpt-oss-120b"
-private const val GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-private const val GROQ_MODEL = "openai/gpt-oss-20b"
-
-/** Builds the ordered fallback chain from whichever provider keys are configured (Gemini first). */
 fun buildClassifierChain(
     config: RuntimeConfig,
     http: HttpHandler,
     metrics: ClassifierMetrics? = null,
 ): List<Classifier> =
-    buildList {
-        if (config.geminiEnabled) add(GeminiClassifier(config.geminiApiKey, http, metrics = metrics))
-        if (config.cerebrasEnabled) {
-            config.cerebrasApiKey?.let {
-                add(
-                    OpenAiCompatibleClassifier(
-                        apiKey = it,
-                        baseUri = CEREBRAS_URL,
-                        model = CEREBRAS_MODEL,
-                        http = http,
-                        provider = "cerebras",
-                        metrics = metrics,
-                    ),
-                )
-            }
-        }
-        config.groqApiKey?.let {
-            add(
-                OpenAiCompatibleClassifier(
-                    apiKey = it,
-                    baseUri = GROQ_URL,
-                    model = GROQ_MODEL,
+    config.aiProviders.map { provider ->
+        when (provider.protocol) {
+            AiProtocol.GEMINI ->
+                GeminiClassifier(
+                    apiKey = provider.apiKey,
                     http = http,
-                    provider = "groq",
+                    model = provider.model,
                     metrics = metrics,
-                ),
-            )
+                    baseUrl = provider.baseUrl,
+                    provider = provider.name,
+                )
+            AiProtocol.ANTHROPIC -> AnthropicClassifier(provider, http, metrics)
+            AiProtocol.OPENAI ->
+                OpenAiCompatibleClassifier(
+                    apiKey = provider.apiKey,
+                    baseUri = "${provider.baseUrl}/chat/completions",
+                    model = provider.model,
+                    http = http,
+                    provider = provider.name,
+                    metrics = metrics,
+                    responseFormat = provider.responseFormat,
+                    reasoningEffort = provider.reasoningEffort,
+                )
         }
     }

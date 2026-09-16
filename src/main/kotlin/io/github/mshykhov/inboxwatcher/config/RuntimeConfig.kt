@@ -4,11 +4,7 @@ data class RuntimeConfig(
     val googleClientId: String,
     val googleClientSecret: String,
     val googleRefreshToken: String,
-    val geminiApiKey: String,
-    val geminiEnabled: Boolean,
-    val cerebrasEnabled: Boolean,
-    val cerebrasApiKey: String?,
-    val groqApiKey: String?,
+    val aiProviders: List<AiProviderConfig>,
     val telegramBotToken: String,
     val telegramChatId: String,
     val stateDbPath: String,
@@ -31,7 +27,6 @@ data class RuntimeConfig(
                     "GOOGLE_CLIENT_ID",
                     "GOOGLE_CLIENT_SECRET",
                     "GOOGLE_REFRESH_TOKEN",
-                    "GEMINI_API_KEY",
                     "TELEGRAM_BOT_TOKEN",
                     "TELEGRAM_CHAT_ID",
                 )
@@ -43,11 +38,7 @@ data class RuntimeConfig(
                 googleClientId = values.getValue("GOOGLE_CLIENT_ID"),
                 googleClientSecret = values.getValue("GOOGLE_CLIENT_SECRET"),
                 googleRefreshToken = values.getValue("GOOGLE_REFRESH_TOKEN"),
-                geminiApiKey = values.getValue("GEMINI_API_KEY"),
-                geminiEnabled = booleanOf(values, "GEMINI_ENABLED", true),
-                cerebrasEnabled = booleanOf(values, "CEREBRAS_ENABLED", false),
-                cerebrasApiKey = values["CEREBRAS_API_KEY"]?.ifBlank { null },
-                groqApiKey = values["GROQ_API_KEY"]?.ifBlank { null },
+                aiProviders = AiProviders.fromMap(values),
                 telegramBotToken = values.getValue("TELEGRAM_BOT_TOKEN"),
                 telegramChatId = values.getValue("TELEGRAM_CHAT_ID"),
                 stateDbPath = values["STATE_DB_PATH"]?.ifBlank { null } ?: "/state/inbox-watcher.db",
@@ -74,15 +65,6 @@ data class RuntimeConfig(
         ): Long {
             val raw = values[key]?.ifBlank { null } ?: return default
             return raw.toLongOrNull() ?: throw ConfigException("$key must be a number, got: $raw")
-        }
-
-        private fun booleanOf(
-            values: Map<String, String>,
-            key: String,
-            default: Boolean,
-        ): Boolean {
-            val raw = values[key]?.ifBlank { null } ?: return default
-            return raw.toBooleanStrictOrNull() ?: throw ConfigException("$key must be true or false, got: $raw")
         }
     }
 }

@@ -1,5 +1,6 @@
 package io.github.mshykhov.inboxwatcher.classifier
 
+import io.github.mshykhov.inboxwatcher.config.AiResponseFormat
 import io.github.mshykhov.inboxwatcher.core.Classification
 import io.github.mshykhov.inboxwatcher.core.Classifier
 import io.github.mshykhov.inboxwatcher.core.ClassifierException
@@ -17,15 +18,17 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 
-/** Classifier for any OpenAI-compatible /chat/completions endpoint (Cerebras, Groq). */
+/** Classifier for any OpenAI-compatible /chat/completions endpoint with configurable structured output. */
 class OpenAiCompatibleClassifier(
-    private val apiKey: String,
+    private val apiKey: String?,
     private val baseUri: String,
     private val model: String,
     private val http: HttpHandler,
     private val maxBodyChars: Int = 4000,
     private val provider: String = "openai-compatible",
     private val metrics: ClassifierMetrics? = null,
+    private val responseFormat: AiResponseFormat = AiResponseFormat.JSON_OBJECT,
+    private val reasoningEffort: String? = null,
 ) : Classifier {
     override fun classify(email: EmailMessage): Classification {
         val startedNanos = System.nanoTime()
@@ -65,9 +68,7 @@ class OpenAiCompatibleClassifier(
         val body =
             buildJsonObject {
                 put("model", model)
-                // gpt-oss are reasoning models; a bounded 4-way classification needs no depth,
-                // and low effort keeps the hidden reasoning from eating the completion budget.
-                put("reasoning_effort", "low")
+                reasoningEffort?.let { put("reasoning_effort", it) }
                 putJsonArray("messages") {
                     add(
                         buildJsonObject {
@@ -82,17 +83,21 @@ class OpenAiCompatibleClassifier(
                         },
                     )
                 }
-                putJsonObject("response_format") {
-                    put("type", "json_schema")
-                    putJsonObject("json_schema") {
-                        put("name", "email_classification")
-                        put("strict", true)
-                        put("schema", strictSchema)
+                if (responseFormat != AiResponseFormat.NONE) {
+                    putJsonObject("response_format") {
+                        put("type", if (responseFormat == AiResponseFormat.JSON_SCHEMA) "json_schema" else "json_object")
+                        if (responseFormat == AiResponseFormat.JSON_SCHEMA) {
+                            putJsonObject("json_schema") {
+                                put("name", "email_classification")
+                                put("strict", true)
+                                put("schema", strictSchema)
+                            }
+                        }
                     }
                 }
             }
         return Request(Method.POST, baseUri)
-            .header("Authorization", "Bearer $apiKey")
+            .let { request -> apiKey?.takeIf { it.isNotBlank() }?.let { request.header("Authorization", "Bearer $it") } ?: request }
             .header("content-type", "application/json")
             .body(body.toString())
     }

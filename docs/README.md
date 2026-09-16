@@ -12,6 +12,7 @@
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Компоненты, поток, состояние, инварианты и выбор polling | Живой |
 | [setup/README.md](setup/README.md) | Навигация по настройке внешних интеграций | Живой |
 | [setup/gmail.md](setup/gmail.md) | GCP, OAuth, Telegram и секреты | Живой runbook |
+| [setup/ai-providers.md](setup/ai-providers.md) | Выбор AI, fallback, ключи, бесплатные каталоги и диагностика | Живой runbook |
 | [telegram-notifications.md](telegram-notifications.md) | Формат пуша, HTML и deep-links | Живой справочник |
 | [db-debug.md](db-debug.md) | SQLite: доступ, схема и диагностические запросы | Живой runbook |
 | [Корневой README](../README.md) | Сборка, env, доставка и общая конфигурация агентов | Живой |
@@ -28,7 +29,7 @@
 | `telegram/TelegramNotifier.kt`, `core/GmailLinks.kt`, `http/OpenInGmail.kt` | [telegram-notifications.md](telegram-notifications.md) и раздел deep-link в [ARCHITECTURE.md](ARCHITECTURE.md) |
 | `state/SqliteEmailStore.kt`, retention в `InboxWatcher.kt` | [db-debug.md](db-debug.md) и состояние в [ARCHITECTURE.md](ARCHITECTURE.md) |
 | `http/HealthHandler.kt`, `metrics/`, `pipeline/SilenceCanary.kt` | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| `config/RuntimeConfig.kt`, `config/EnvFiles.kt`, `.env.example` | Env и запуск в [корневом README](../README.md) |
+| `config/RuntimeConfig.kt`, `config/AiProviders.kt`, `config/EnvFiles.kt`, `.env.example` | Env и запуск в [корневом README](../README.md), [AI-провайдеры](setup/ai-providers.md) |
 | Gmail OAuth, scopes, `scripts/get-refresh-token.py` или внешние секреты | [setup/gmail.md](setup/gmail.md) |
 | `build.gradle.kts`, `Dockerfile`, `.github/workflows/` | Команды и доставка в [корневом README](../README.md) |
 | `.rulesync/`, `rulesync.jsonc`, `package.json` | Конфигурация агентов в [корневом README](../README.md) и generated outputs |

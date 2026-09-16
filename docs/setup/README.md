@@ -5,5 +5,6 @@
 Новые процедуры называй по интеграции в `kebab-case.md`; команды должны указывать контекст исполнения.
 
 - [Gmail, OAuth, Telegram и секреты](gmail.md)
+- [AI-провайдеры, ключи и бесплатные API](ai-providers.md)
 
 Общие правила: [SCHEMA.md](../SCHEMA.md). Полная карта: [docs/README.md](../README.md).

@@ -6,7 +6,7 @@
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A self-hosted Gmail inbox watcher that sends concise Telegram alerts for messages that need attention. It polls Gmail, stores processed message IDs in SQLite, classifies mail with Gemini and optional OpenAI-compatible fallbacks, and exposes `/health` and `/metrics`.
+A self-hosted Gmail inbox watcher that sends concise Telegram alerts for messages that need attention. It polls Gmail, stores processed message IDs in SQLite, classifies mail with configurable AI providers and ordered fallbacks, and exposes `/health` and `/metrics`.
 
 The built-in classifier is tuned for job-search, transactional, and AI-product mail. The pipeline and classifier prompt are ordinary Kotlin code, so categories can be adapted for another inbox workflow.
 
@@ -30,7 +30,32 @@ See [the Gmail setup note](docs/setup/gmail.md) for the required configuration v
 
 ## Configuration
 
-`GEMINI_API_KEY`, `TELEGRAM_BOT_TOKEN`, and `TELEGRAM_CHAT_ID` are required alongside the Gmail OAuth values. `GROQ_API_KEY` and `CEREBRAS_API_KEY` are optional OpenAI-compatible classifier fallbacks. `.env.example` lists polling, retention, and HTTP settings.
+Обязательны Gmail OAuth, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` и хотя бы один AI-провайдер.
+Ключ Gemini не нужен, если выбран другой сервис. Приоритет настроек:
+`.env.example` < `.env` < переменные окружения процесса.
+
+Выбор и порядок резервных провайдеров задаются в `.env`:
+
+```dotenv
+AI_PROVIDERS=groq,gemini
+GROQ_API_KEY=your-groq-key
+GEMINI_API_KEY=your-google-key
+```
+
+Поддерживаются Gemini, Anthropic, OpenAI, OpenRouter, Groq, Cerebras, локальная Ollama и
+любой API с совместимым OpenAI Chat Completions контрактом. Можно менять модель, URL,
+JSON-режим и порядок fallback, а также подключать несколько моделей одного сервиса.
+Без `AI_PROVIDERS` сохраняется прежняя цепочка по ключам и флагам.
+
+**[Настройка AI: примеры, получение ключей, все env-параметры и диагностика](docs/setup/ai-providers.md)**.
+Шаблон: [`.env.example`](.env.example). Каталоги бесплатных вариантов:
+[Free AI Bible](https://github.com/abbosaliboev/free-ai-bible) и
+[Free LLM API resources](https://github.com/cheahjs/free-llm-api-resources).
+Актуальные квоты и тарифы проверяй у выбранного сервиса.
+
+Runtime-переменные: `STATE_DB_PATH` (по умолчанию `/state/inbox-watcher.db`), `HTTP_PORT` (`8080`),
+`POLL_INTERVAL_SECONDS` (`60`), `SILENCE_ALERT_HOURS` (`12`, `0` отключает алерт),
+`PUBLIC_BASE_URL` (необязательный адрес для ссылки открытия Gmail). История хранится 7 дней.
 
 ## Container
 

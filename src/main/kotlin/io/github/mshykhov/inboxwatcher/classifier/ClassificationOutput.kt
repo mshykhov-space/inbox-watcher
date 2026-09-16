@@ -161,7 +161,14 @@ private data class ClassificationDto(
 internal fun parseClassification(text: String): Classification {
     val dto =
         try {
-            classifierJson.decodeFromString<ClassificationDto>(text)
+            classifierJson.decodeFromString<ClassificationDto>(
+                text
+                    .trim()
+                    .removePrefix("```json")
+                    .removePrefix("```")
+                    .removeSuffix("```")
+                    .trim(),
+            )
         } catch (e: Exception) {
             throw ClassifierException("unparseable classifier output: $text", e)
         }

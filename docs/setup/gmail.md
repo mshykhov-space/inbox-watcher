@@ -26,17 +26,11 @@ Pub/Sub push (`users.watch()` + webhook) сознательно НЕ испол�
 
 ## 4. Секреты
 
-Храни значения в локальном `.env` или в secret store своей платформы. Имена runtime-переменных
-перечислены в `.env.example`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
-`GOOGLE_REFRESH_TOKEN`, `GEMINI_API_KEY`, `CEREBRAS_API_KEY`, `CEREBRAS_ENABLED`,
-`GROQ_API_KEY`, `TELEGRAM_BOT_TOKEN` и `TELEGRAM_CHAT_ID`.
-
-Классификатор - бесплатные free-tier LLM. Рабочая цепочка по умолчанию: Gemini → Groq.
-Cerebras добавляется между ними только при `CEREBRAS_ENABLED=true`: исчерпанный ключ не должен
-добавлять гарантированно неуспешный запрос на каждое письмо. Если Google отвечает постоянным
-project-level `403 PERMISSION_DENIED`, задай `GEMINI_ENABLED=false`: цепочка начнётся с Groq
-(или Cerebras, если он явно включён). Приватность: Gemini free tier обучается на данных, если
-аккаунт не в UK/CH/EEA/EU - учитывай для рекрутёрской почты.
+Храни значения в локальном `.env` или в secret store своей платформы. Для Gmail нужны
+`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, для Telegram -
+`TELEGRAM_BOT_TOKEN` и `TELEGRAM_CHAT_ID`. Для AI выбери хотя бы одного провайдера:
+[выбор сервиса, ключи, бесплатные каталоги и примеры](ai-providers.md).
+Ключ Gemini обязателен только если Gemini включён в цепочку. Полный шаблон - `.env.example`.
 
 Локальный запуск использует `.env` (файл в `.gitignore`, шаблон `.env.example`). Для контейнерной
 платформы передай те же переменные из её secret store, подключи постоянный volume к `/state` и
