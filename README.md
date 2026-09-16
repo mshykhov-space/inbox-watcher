@@ -50,7 +50,9 @@ JSON-режим и порядок fallback, а также подключать �
 **[Настройка AI: примеры, получение ключей, все env-параметры и диагностика](docs/setup/ai-providers.md)**.
 Шаблон: [`.env.example`](.env.example). Каталоги бесплатных вариантов:
 [Free AI Bible](https://github.com/abbosaliboev/free-ai-bible) и
-[Free LLM API resources](https://github.com/cheahjs/free-llm-api-resources).
+[Awesome Free LLM APIs](https://github.com/open-free-llm-api/awesome-freellm-apis).
+Продолжаемый форк прежнего Free LLM API resources: [FLA](https://github.com/startupmini/FLA)
+(описание на индонезийском, список моделей обновляется автоматически).
 Актуальные квоты и тарифы проверяй у выбранного сервиса.
 
 Runtime-переменные: `STATE_DB_PATH` (по умолчанию `/state/inbox-watcher.db`), `HTTP_PORT` (`8080`),

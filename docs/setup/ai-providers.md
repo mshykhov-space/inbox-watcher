@@ -163,7 +163,8 @@ BACKUP_RESPONSE_FORMAT=none
 Каталоги для поиска:
 
 - [Free AI Bible](https://github.com/abbosaliboev/free-ai-bible) - общий каталог AI API и инструментов.
-- [Free LLM API resources](https://github.com/cheahjs/free-llm-api-resources) - список именно LLM inference API, включая бесплатные квоты и пробные кредиты.
+- [Awesome Free LLM APIs](https://github.com/open-free-llm-api/awesome-freellm-apis) - отдельный англоязычный каталог LLM API, моделей, лимитов и ссылок на получение ключей; автоматически обновляется.
+- [FLA](https://github.com/startupmini/FLA) - продолжаемый форк Free LLM API resources с автоматическим обновлением списка моделей; описание на индонезийском.
 
 Каталог помогает найти сервис, но не гарантирует текущую бесплатность. Проверяй тариф,
 доступную модель и лимиты в кабинете самого провайдера. Бесплатный веб-чат не означает
