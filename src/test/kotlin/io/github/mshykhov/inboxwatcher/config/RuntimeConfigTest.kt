@@ -181,6 +181,20 @@ class RuntimeConfigTest {
     }
 
     @Test
+    fun `uses bounded NVIDIA defaults with thinking disabled`() {
+        val provider =
+            RuntimeConfig
+                .fromMap(required + mapOf("AI_PROVIDERS" to "nvidia", "NVIDIA_API_KEY" to "key"))
+                .aiProviders
+                .single()
+
+        assertEquals("https://integrate.api.nvidia.com/v1", provider.baseUrl)
+        assertEquals("nvidia/nemotron-3.5-lightning-30b-a3b", provider.model)
+        assertEquals(AiResponseFormat.JSON_SCHEMA, provider.responseFormat)
+        assertEquals("disabled", provider.thinking)
+    }
+
+    @Test
     fun `rejects a non-numeric port`() {
         assertFailsWith<ConfigException> {
             RuntimeConfig.fromMap(required + ("HTTP_PORT" to "not-a-number"))

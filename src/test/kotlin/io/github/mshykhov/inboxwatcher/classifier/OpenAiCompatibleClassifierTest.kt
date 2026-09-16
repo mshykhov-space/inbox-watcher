@@ -159,6 +159,28 @@ class OpenAiCompatibleClassifierTest {
             body.contains("\"reasoning_effort\":\"low\""),
             "gpt-oss must run at low reasoning effort - bounded classification, avoids burning the completion budget",
         )
+        assertTrue(body.contains("\"max_tokens\":1024"), "completion length must be bounded")
+    }
+
+    @Test
+    fun `disables NVIDIA chat template thinking and bounds completion`() {
+        OpenAiCompatibleClassifier(
+            apiKey = "key",
+            baseUri = "https://integrate.api.nvidia.com/v1/chat/completions",
+            model = "nvidia/nemotron-3.5-lightning-30b-a3b",
+            provider = "nvidia",
+            maxTokens = 500,
+            thinking = "disabled",
+            http = { request ->
+                val body = request.bodyString()
+                assertTrue(body.contains("\"max_tokens\":500"))
+                assertTrue(body.contains("\"chat_template_kwargs\":{\"enable_thinking\":false}"))
+                assertTrue(!body.contains("\"thinking\""))
+                Response(Status.OK).body(
+                    completion("""{"importance":"important","urgency":"urgent","category":"other","summary":"x"}"""),
+                )
+            },
+        ).classify(email)
     }
 
     @Test

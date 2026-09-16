@@ -8,6 +8,7 @@ internal object AiProviders {
         mapOf(
             "gemini" to ("https://generativelanguage.googleapis.com/v1beta" to "gemini-2.5-flash"),
             "groq" to ("https://api.groq.com/openai/v1" to "openai/gpt-oss-20b"),
+            "nvidia" to ("https://integrate.api.nvidia.com/v1" to "nvidia/nemotron-3.5-lightning-30b-a3b"),
             "cerebras" to ("https://api.cerebras.ai/v1" to "gpt-oss-120b"),
             "openai" to ("https://api.openai.com/v1" to null),
             "openrouter" to ("https://openrouter.ai/api/v1" to null),
@@ -69,15 +70,25 @@ internal object AiProviders {
         val authRequired = booleanOf(values, "${prefix}_AUTH_REQUIRED", name != "ollama")
         if (apiKey == null && authRequired) required("API_KEY")
         val legacyReasoning = name in setOf("groq", "cerebras") && model == defaults[name]?.second
+        val strictJson = legacyReasoning || (name == "nvidia" && model == defaults[name]?.second)
         val format =
             setting("RESPONSE_FORMAT")?.let { raw ->
                 AiResponseFormat.entries.firstOrNull { it.name.equals(raw, ignoreCase = true) }
                     ?: throw ConfigException("${prefix}_RESPONSE_FORMAT must be json_schema, json_object or none")
-            } ?: if (legacyReasoning) AiResponseFormat.JSON_SCHEMA else AiResponseFormat.JSON_OBJECT
+            } ?: if (strictJson) AiResponseFormat.JSON_SCHEMA else AiResponseFormat.JSON_OBJECT
         val effort = setting("REASONING_EFFORT") ?: if (legacyReasoning) "low" else null
         val maxTokens = setting("MAX_TOKENS")?.let { it.toIntOrNull() ?: 0 } ?: 1024
         if (maxTokens <= 0) throw ConfigException("${prefix}_MAX_TOKENS must be a positive integer")
-        val thinking = setting("THINKING")?.lowercase(Locale.ROOT)
+        val thinking =
+            (
+                setting("THINKING") ?: if (name == "nvidia" &&
+                    model == defaults[name]?.second
+                ) {
+                    "disabled"
+                } else {
+                    null
+                }
+            )?.lowercase(Locale.ROOT)
         if (thinking != null && (protocol != AiProtocol.OPENAI || thinking !in setOf("enabled", "disabled"))) {
             throw ConfigException("${prefix}_THINKING must be enabled or disabled and requires the openai API type")
         }

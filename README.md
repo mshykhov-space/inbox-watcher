@@ -37,12 +37,12 @@ See [the Gmail setup note](docs/setup/gmail.md) for the required configuration v
 Выбор и порядок резервных провайдеров задаются в `.env`:
 
 ```dotenv
-AI_PROVIDERS=groq,zai
+AI_PROVIDERS=groq,nvidia
 GROQ_API_KEY=your-groq-key
-ZAI_API_KEY=your-zai-key
-ZAI_BASE_URL=https://api.z.ai/api/paas/v4
-ZAI_MODEL=glm-4.5-flash
-ZAI_THINKING=disabled
+NVIDIA_API_KEY=your-nvidia-key
+NVIDIA_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b
+NVIDIA_MAX_TOKENS=500
+NVIDIA_THINKING=disabled
 AI_REQUEST_TIMEOUT_SECONDS=60
 ```
 
