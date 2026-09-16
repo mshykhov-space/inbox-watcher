@@ -8,7 +8,7 @@
 
 A self-hosted Gmail inbox watcher that sends concise Telegram alerts for messages that need attention. It polls Gmail, stores processed message IDs in SQLite, classifies mail with configurable AI providers and ordered fallbacks, and exposes `/health` and `/metrics`.
 
-The built-in classifier is tuned for job-search, transactional, and AI-product mail. The pipeline and classifier prompt are ordinary Kotlin code, so categories can be adapted for another inbox workflow.
+The built-in classifier recognizes personal correspondence, job-search, transactional, and AI-product mail. Genuine personal messages always trigger an alert, including informational updates without a request to reply. The pipeline and classifier prompt are ordinary Kotlin code, so categories can be adapted for another inbox workflow.
 
 ## Run locally
 

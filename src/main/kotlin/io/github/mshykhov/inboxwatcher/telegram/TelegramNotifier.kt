@@ -76,6 +76,7 @@ class TelegramNotifier(
             Category.RECRUITER_INTERVIEW_REQUEST -> "🗓" to "Приглашение на интервью"
             Category.RECRUITER_REJECTION -> "❌" to "Отказ"
             Category.RECRUITER_GENERIC -> "✉️" to "Письмо рекрутёра"
+            Category.PERSONAL -> "💬" to "Личное письмо"
             Category.AI_NEWS -> "🤖" to "AI-анонс"
             Category.TRANSACTIONAL -> "🧾" to "Транзакция"
             Category.OTHER -> "📌" to "Требуется действие"

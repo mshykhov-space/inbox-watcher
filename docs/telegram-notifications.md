@@ -33,6 +33,7 @@ Unclassified (деградация классификатора, письмо н
 | recruiter-interview-request | 🗓 | Приглашение на интервью |
 | recruiter-rejection | ❌ | Отказ |
 | recruiter-generic | ✉️ | Письмо рекрутёра |
+| personal | 💬 | Личное письмо |
 | ai-news | 🤖 | AI-анонс |
 | transactional | 🧾 | Транзакция |
 | other (important-автоматика: оффер/дедлайн-шаг) | 📌 | Требуется действие |

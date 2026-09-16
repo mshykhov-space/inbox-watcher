@@ -127,6 +127,21 @@ class EmailProcessorTest {
     }
 
     @Test
+    fun `personal informational email is notified and deduplicated`() {
+        val gateway = FakeGateway(ids = listOf("personal"), messages = mapOf("personal" to email("personal")))
+        val store = InMemoryStore()
+        val notifier = RecordingNotifier()
+        val classifier = StubClassifier(mapOf("personal" to classification(Importance.IMPORTANT).copy(category = Category.PERSONAL)))
+        val processor = processor(gateway, store, classifier, notifier)
+
+        processor.pollOnce()
+        processor.pollOnce()
+
+        assertEquals(listOf("personal"), notifier.sent.map { it.first })
+        assertTrue(store.decisions.getValue("personal").notified)
+    }
+
+    @Test
     fun `records but does not notify an unimportant email`() {
         val gateway = FakeGateway(ids = listOf("a"), messages = mapOf("a" to email("a")))
         val store = InMemoryStore()

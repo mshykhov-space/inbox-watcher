@@ -10,6 +10,7 @@ enum class Category(
     RECRUITER_INTERVIEW_REQUEST("recruiter-interview-request"),
     RECRUITER_REJECTION("recruiter-rejection"),
     RECRUITER_GENERIC("recruiter-generic"),
+    PERSONAL("personal"),
     AI_NEWS("ai-news"),
     TRANSACTIONAL("transactional"),
     OTHER("other"),

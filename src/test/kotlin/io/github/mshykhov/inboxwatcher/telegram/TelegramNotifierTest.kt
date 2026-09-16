@@ -215,6 +215,19 @@ class TelegramNotifierTest {
     }
 
     @Test
+    fun `personal informational mail has its own headline without urgency or action`() {
+        val (handler, captured) = capturing()
+        TelegramNotifier(botToken = "t", chatId = "1", http = handler).notify(
+            email,
+            classification.copy(category = Category.PERSONAL, urgency = Urgency.NOT_URGENT, company = null, action = null),
+        )
+        val text = sentText(captured)
+        assertTrue(text.contains("💬 <b>Личное письмо</b>"))
+        assertFalse(text.contains("❗"))
+        assertFalse(text.contains("➡️"))
+    }
+
+    @Test
     fun `ai-news gets its own headline`() {
         val (handler, captured) = capturing()
         TelegramNotifier(botToken = "t", chatId = "1", http = handler)
