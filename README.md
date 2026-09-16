@@ -43,6 +43,7 @@ ZAI_API_KEY=your-zai-key
 ZAI_BASE_URL=https://api.z.ai/api/paas/v4
 ZAI_MODEL=glm-4.5-flash
 ZAI_THINKING=disabled
+AI_REQUEST_TIMEOUT_SECONDS=60
 ```
 
 Поддерживаются Gemini, Anthropic, OpenAI, OpenRouter, Groq, Cerebras, локальная Ollama и
@@ -63,7 +64,9 @@ JSON-режим и порядок fallback, а также подключать �
 
 Runtime-переменные: `STATE_DB_PATH` (по умолчанию `/state/inbox-watcher.db`), `HTTP_PORT` (`8080`),
 `POLL_INTERVAL_SECONDS` (`60`), `SILENCE_ALERT_HOURS` (`12`, `0` отключает алерт),
-`PUBLIC_BASE_URL` (необязательный адрес для ссылки открытия Gmail). История хранится 7 дней.
+`PUBLIC_BASE_URL` (необязательный адрес для ссылки открытия Gmail),
+`AI_REQUEST_TIMEOUT_SECONDS` (по умолчанию `30`, от `1` до `60`, отдельно для каждого AI-запроса).
+Gmail и Telegram сохраняют timeout 30 секунд. История хранится 7 дней.
 
 ## Container
 

@@ -14,6 +14,7 @@ data class RuntimeConfig(
     val silenceAlertHours: Long,
     /** Public base of this service (e.g. https://mail.example.test); enables the app redirect link. */
     val publicBaseUrl: String?,
+    val aiRequestTimeoutSeconds: Long = 30L,
 ) {
     companion object {
         fun fromEnvironment(
@@ -46,6 +47,10 @@ data class RuntimeConfig(
                 pollIntervalSeconds = longOf(values, "POLL_INTERVAL_SECONDS", 60L),
                 silenceAlertHours = longOf(values, "SILENCE_ALERT_HOURS", 12L),
                 publicBaseUrl = values["PUBLIC_BASE_URL"]?.ifBlank { null }?.trimEnd('/'),
+                aiRequestTimeoutSeconds =
+                    longOf(values, "AI_REQUEST_TIMEOUT_SECONDS", 30L).also {
+                        if (it !in 1L..60L) throw ConfigException("AI_REQUEST_TIMEOUT_SECONDS must be between 1 and 60")
+                    },
             )
         }
 

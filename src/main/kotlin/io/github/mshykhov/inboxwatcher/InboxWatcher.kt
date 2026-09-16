@@ -30,8 +30,9 @@ import java.util.concurrent.TimeUnit
 /** Composition root: wires the polling pipeline + health server and owns their lifecycle. */
 class InboxWatcher(
     private val config: RuntimeConfig,
-    private val http: HttpHandler = defaultHttpHandler(),
+    http: HttpHandler? = null,
 ) : AutoCloseable {
+    private val outboundHttp = http ?: defaultHttpHandler()
     private val registry =
         PrometheusMeterRegistry(PrometheusConfig.DEFAULT).also {
             JvmMemoryMetrics().bindTo(it)
@@ -39,9 +40,10 @@ class InboxWatcher(
         }
     private val sqlite = SqliteEmailStore(Path.of(config.stateDbPath))
     private val store = MeteredEmailStore(sqlite, registry)
-    private val alerter = TelegramAlerter(config.telegramBotToken, config.telegramChatId, http)
-    private val classifiers = buildClassifierChain(config, http, ClassifierMetrics(registry))
-    private val gmail = GmailClient(config.googleClientId, config.googleClientSecret, config.googleRefreshToken, http)
+    private val alerter = TelegramAlerter(config.telegramBotToken, config.telegramChatId, outboundHttp)
+    private val classifiers =
+        buildClassifierChain(config, http ?: defaultHttpHandler(config.aiRequestTimeoutSeconds), ClassifierMetrics(registry))
+    private val gmail = GmailClient(config.googleClientId, config.googleClientSecret, config.googleRefreshToken, outboundHttp)
 
     // Best-effort: pins deep-links to the watched mailbox; a boot without network falls back to /u/0.
     private val accountEmail: String? =
@@ -53,7 +55,7 @@ class InboxWatcher(
             gmail = gmail,
             store = store,
             classifier = FallbackClassifier(classifiers),
-            notifier = TelegramNotifier(config.telegramBotToken, config.telegramChatId, http, accountEmail, config.publicBaseUrl),
+            notifier = TelegramNotifier(config.telegramBotToken, config.telegramChatId, outboundHttp, accountEmail, config.publicBaseUrl),
             onError = { message, cause ->
                 logger.error(message, cause)
                 alerter.alert("$message: ${cause.message}")

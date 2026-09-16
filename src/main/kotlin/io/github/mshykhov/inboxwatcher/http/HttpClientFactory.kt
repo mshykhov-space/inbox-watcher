@@ -7,11 +7,11 @@ import java.time.Duration
 
 /**
  * Outbound HTTP client with connect + per-request timeouts, so a hung external call cannot
- * freeze the single-threaded poll loop (zero-miss). Transport failures surface as exceptions,
- * which each client wraps into its domain exception.
+ * freeze the single-threaded poll loop (zero-miss). The http4k client maps a timeout to 504,
+ * which adapters handle like other unsuccessful responses.
  */
-fun defaultHttpHandler(): HttpHandler =
+fun defaultHttpHandler(requestTimeoutSeconds: Long = 30L): HttpHandler =
     JavaHttpClient(
         httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build(),
-        requestModifier = { it.timeout(Duration.ofSeconds(30)) },
+        requestModifier = { it.timeout(Duration.ofSeconds(requestTimeoutSeconds)) },
     )

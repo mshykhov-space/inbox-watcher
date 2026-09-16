@@ -56,6 +56,17 @@ class RuntimeConfigTest {
         assertEquals(60L, config.pollIntervalSeconds)
         assertEquals(12L, config.silenceAlertHours)
         assertNull(config.publicBaseUrl)
+        assertEquals(30L, config.aiRequestTimeoutSeconds)
+    }
+
+    @Test
+    fun `bounds the classifier timeout separately from other HTTP calls`() {
+        assertEquals(60L, RuntimeConfig.fromMap(required + ("AI_REQUEST_TIMEOUT_SECONDS" to "60")).aiRequestTimeoutSeconds)
+        for (value in listOf("0", "-1", "61", "invalid")) {
+            assertFailsWith<ConfigException> {
+                RuntimeConfig.fromMap(required + ("AI_REQUEST_TIMEOUT_SECONDS" to value))
+            }
+        }
     }
 
     @Test
