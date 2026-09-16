@@ -194,6 +194,7 @@ class OpenAiCompatibleClassifierTest {
                 assertTrue(request.bodyString().contains("json_object"))
                 assertTrue(!request.bodyString().contains("json_schema"))
                 assertTrue(!request.bodyString().contains("reasoning_effort"))
+                assertTrue(!request.bodyString().contains("\"thinking\""))
                 Response(Status.OK).body(
                     completion(
                         """{"importance":"important","urgency":"urgent","category":"other","summary":"x"}""",

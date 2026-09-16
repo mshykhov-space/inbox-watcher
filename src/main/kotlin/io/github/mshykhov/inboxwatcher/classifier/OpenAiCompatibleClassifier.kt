@@ -29,6 +29,7 @@ class OpenAiCompatibleClassifier(
     private val metrics: ClassifierMetrics? = null,
     private val responseFormat: AiResponseFormat = AiResponseFormat.JSON_OBJECT,
     private val reasoningEffort: String? = null,
+    private val thinking: String? = null,
 ) : Classifier {
     override fun classify(email: EmailMessage): Classification {
         val startedNanos = System.nanoTime()
@@ -69,6 +70,7 @@ class OpenAiCompatibleClassifier(
             buildJsonObject {
                 put("model", model)
                 reasoningEffort?.let { put("reasoning_effort", it) }
+                thinking?.let { mode -> putJsonObject("thinking") { put("type", mode) } }
                 putJsonArray("messages") {
                     add(
                         buildJsonObject {

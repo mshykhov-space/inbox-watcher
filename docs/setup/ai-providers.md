@@ -26,6 +26,25 @@ GEMINI_API_KEY=your-google-key
 GROQ_API_KEY=your-groq-key
 ```
 
+Независимый резерв для Groq через Z.ai:
+
+```dotenv
+AI_PROVIDERS=groq,zai
+GROQ_API_KEY=your-groq-key
+ZAI_API_KEY=your-zai-key
+ZAI_BASE_URL=https://api.z.ai/api/paas/v4
+ZAI_MODEL=glm-4.5-flash
+ZAI_THINKING=disabled
+```
+
+GLM-4.5-Flash указана как бесплатная по входным и выходным токенам в
+[тарифах Z.ai](https://docs.z.ai/guides/overview/pricing). Не путай её с платными FlashX.
+`THINKING=disabled` отключает рассуждения через
+[`thinking.type`](https://docs.z.ai/api-reference/llm/chat-completion), чтобы короткая классификация
+укладывалась в HTTP timeout 30 секунд. Проверяй доступность модели и конкурентный лимит
+в своём кабинете; бесплатный тариф не гарантирует отсутствие перегрузок или неизменные квоты.
+Две модели одного провайдера не дают независимого резерва при общей квоте или сбое сервиса.
+
 Бесплатный маршрутизатор OpenRouter:
 
 ```dotenv
@@ -124,6 +143,7 @@ BACKUP_RESPONSE_FORMAT=none
 | `<NAME>_MODEL` | ID модели; для Gemini без префикса `models/`. Обязателен, кроме трёх прежних провайдеров из таблицы ниже |
 | `<NAME>_RESPONSE_FORMAT` | Только OpenAI-совместимый API: `json_schema`, `json_object`, `none`. По умолчанию `json_object`; `none` не отправляет `response_format`, но JSON по-прежнему требуется промптом и проверяется парсером |
 | `<NAME>_REASONING_EFFORT` | Только OpenAI-совместимый API: значение, поддерживаемое моделью. По умолчанию параметр не отправляется; `none` явно отключает отправку |
+| `<NAME>_THINKING` | Только OpenAI-совместимые API с объектом `thinking`: `enabled` или `disabled`, регистр не важен. Передаётся как `thinking.type`; по умолчанию отсутствует. Несовместимый API может отклонить запрос |
 | `<NAME>_MAX_TOKENS` | Только Anthropic: положительный лимит ответа, по умолчанию `1024` |
 
 Встроенные значения:
@@ -155,6 +175,7 @@ BACKUP_RESPONSE_FORMAT=none
 |--------|-------------------------------|
 | Google Gemini | [Google AI Studio](https://aistudio.google.com/apikey) |
 | Groq | [Groq Console](https://console.groq.com/keys), [совместимость API](https://console.groq.com/docs/openai) |
+| Z.ai | [API keys](https://z.ai/manage-apikey/apikey-list), [тарифы](https://docs.z.ai/guides/overview/pricing), [лимиты аккаунта](https://z.ai/manage-apikey/rate-limits) |
 | Cerebras | [Cerebras Cloud](https://cloud.cerebras.ai/), [документация](https://inference-docs.cerebras.ai/) |
 | OpenRouter | [API keys](https://openrouter.ai/settings/keys), [каталог моделей](https://openrouter.ai/models) |
 | OpenAI | [API keys](https://platform.openai.com/api-keys) |

@@ -33,6 +33,7 @@ fun buildClassifierChain(
                     metrics = metrics,
                     responseFormat = provider.responseFormat,
                     reasoningEffort = provider.reasoningEffort,
+                    thinking = provider.thinking,
                 )
         }
     }

@@ -37,14 +37,20 @@ See [the Gmail setup note](docs/setup/gmail.md) for the required configuration v
 Выбор и порядок резервных провайдеров задаются в `.env`:
 
 ```dotenv
-AI_PROVIDERS=groq,gemini
+AI_PROVIDERS=groq,zai
 GROQ_API_KEY=your-groq-key
-GEMINI_API_KEY=your-google-key
+ZAI_API_KEY=your-zai-key
+ZAI_BASE_URL=https://api.z.ai/api/paas/v4
+ZAI_MODEL=glm-4.5-flash
+ZAI_THINKING=disabled
 ```
 
 Поддерживаются Gemini, Anthropic, OpenAI, OpenRouter, Groq, Cerebras, локальная Ollama и
 любой API с совместимым OpenAI Chat Completions контрактом. Можно менять модель, URL,
 JSON-режим и порядок fallback, а также подключать несколько моделей одного сервиса.
+Для API с параметром `thinking.type` доступен `<NAME>_THINKING=enabled|disabled`;
+по умолчанию параметр не отправляется. Независимый резерв требует другого провайдера:
+две модели одного сервиса могут одновременно перестать работать при его сбое или исчерпании квоты.
 Без `AI_PROVIDERS` сохраняется прежняя цепочка по ключам и флагам.
 
 **[Настройка AI: примеры, получение ключей, все env-параметры и диагностика](docs/setup/ai-providers.md)**.

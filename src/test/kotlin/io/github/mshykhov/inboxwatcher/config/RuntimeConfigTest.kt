@@ -144,6 +144,8 @@ class RuntimeConfigTest {
                 mapOf("CUSTOM_RESPONSE_FORMAT" to "bad"),
                 mapOf("CUSTOM_AUTH_REQUIRED" to "bad"),
                 mapOf("CUSTOM_MAX_TOKENS" to "0"),
+                mapOf("CUSTOM_THINKING" to "false"),
+                mapOf("CUSTOM_THINKING" to "disabled", "CUSTOM_API_TYPE" to "anthropic"),
             )
         invalid.forEach { override ->
             assertFailsWith<ConfigException>(override.keys.toString()) {

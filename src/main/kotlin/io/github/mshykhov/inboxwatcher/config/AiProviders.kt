@@ -77,7 +77,21 @@ internal object AiProviders {
         val effort = setting("REASONING_EFFORT") ?: if (legacyReasoning) "low" else null
         val maxTokens = setting("MAX_TOKENS")?.let { it.toIntOrNull() ?: 0 } ?: 1024
         if (maxTokens <= 0) throw ConfigException("${prefix}_MAX_TOKENS must be a positive integer")
-        return AiProviderConfig(name, protocol, apiKey, baseUrl, model, format, effort?.takeUnless { it == "none" }, maxTokens)
+        val thinking = setting("THINKING")?.lowercase(Locale.ROOT)
+        if (thinking != null && (protocol != AiProtocol.OPENAI || thinking !in setOf("enabled", "disabled"))) {
+            throw ConfigException("${prefix}_THINKING must be enabled or disabled and requires the openai API type")
+        }
+        return AiProviderConfig(
+            name,
+            protocol,
+            apiKey,
+            baseUrl,
+            model,
+            format,
+            effort?.takeUnless { it == "none" },
+            maxTokens,
+            thinking,
+        )
     }
 
     private fun booleanOf(
