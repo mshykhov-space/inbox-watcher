@@ -1,7 +1,7 @@
 # Inbox Watcher
 
-[![CI](https://github.com/mshykhov/inbox-watcher/actions/workflows/ci.yml/badge.svg)](https://github.com/mshykhov/inbox-watcher/actions/workflows/ci.yml)
-[![Release](https://github.com/mshykhov/inbox-watcher/actions/workflows/release.yml/badge.svg)](https://github.com/mshykhov/inbox-watcher/actions/workflows/release.yml)
+[![CI](https://github.com/mshykhov-space/inbox-watcher/actions/workflows/ci.yml/badge.svg)](https://github.com/mshykhov-space/inbox-watcher/actions/workflows/ci.yml)
+[![Release](https://github.com/mshykhov-space/inbox-watcher/actions/workflows/release.yml/badge.svg)](https://github.com/mshykhov-space/inbox-watcher/actions/workflows/release.yml)
 [![Rulesync](https://img.shields.io/badge/agent%20config-Rulesync-6A5ACD)](https://github.com/dyoshikawa/rulesync)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -78,11 +78,11 @@ docker run --env-file .env -p 8080:8080 -v inbox-state:/state inbox-watcher
 Published releases are available as a Linux container image and a portable Gradle distribution:
 
 ```sh
-docker pull ghcr.io/mshykhov/inbox-watcher:latest
-docker run --env-file .env -p 8080:8080 -v inbox-state:/state ghcr.io/mshykhov/inbox-watcher:latest
+docker pull ghcr.io/mshykhov-space/inbox-watcher:latest
+docker run --env-file .env -p 8080:8080 -v inbox-state:/state ghcr.io/mshykhov-space/inbox-watcher:latest
 ```
 
-Each `vX.Y.Z` tag publishes `ghcr.io/mshykhov/inbox-watcher:<version>` and `:latest`, plus a
+Each `vX.Y.Z` tag publishes `ghcr.io/mshykhov-space/inbox-watcher:<version>` and `:latest`, plus a
 `inbox-watcher-<version>.tar.gz` distribution attached to the GitHub release.
 
 The service listens on port 8080. `GET /health` reports the poll-loop state, and `GET /metrics` exposes Prometheus metrics.
